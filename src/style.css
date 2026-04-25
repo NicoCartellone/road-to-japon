@@ -16,6 +16,12 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 html,
 body {
   height: 100%;
@@ -26,6 +32,7 @@ html {
     radial-gradient(900px 700px at 80% 20%, #3b155a 0%, transparent 55%),
     linear-gradient(180deg, var(--bg0), var(--bg1));
   background-color: var(--bg0);
+  overflow-x: hidden;
 }
 
 body {
@@ -34,6 +41,7 @@ body {
   overflow: hidden;
   background: transparent;
   overscroll-behavior: none;
+  overflow-x: hidden;
 }
 
 /*
@@ -61,7 +69,6 @@ body::before {
   display: grid;
   place-items: center;
   padding: 24px;
-  box-sizing: border-box;
   padding-top: calc(24px + env(safe-area-inset-top));
   padding-bottom: calc(24px + env(safe-area-inset-bottom));
 }
@@ -195,10 +202,13 @@ h1 {
     grid-template-columns: 1fr;
     gap: 10px;
     justify-items: center;
+    width: 100%;
+    padding-inline: 10px;
   }
 
   .cell {
-    width: min(440px, 100%);
+    width: 100%;
+    max-width: 440px;
   }
 
   .sep {
