@@ -19,6 +19,10 @@ type Remaining = {
   ss: number
 }
 
+type PwaNeedRefreshEvent = CustomEvent<{
+  updateSW: (reloadPage?: boolean) => Promise<void>
+}>
+
 function pad2(n: number) {
   return String(n).padStart(2, '0')
 }
@@ -84,6 +88,7 @@ export default function App() {
   const target = useMemo(() => getTargetEpochMsInBuenosAires(), [])
   const [remaining, setRemaining] = useState<Remaining>(() => calcRemaining(target))
   const [hasUpdate, setHasUpdate] = useState(false)
+  const [updateFn, setUpdateFn] = useState<null | ((reloadPage?: boolean) => Promise<void>)>(null)
 
   useEffect(() => {
     const id = window.setInterval(() => setRemaining(calcRemaining(target)), 250)
@@ -91,7 +96,11 @@ export default function App() {
   }, [target])
 
   useEffect(() => {
-    const onNeedRefresh = () => setHasUpdate(true)
+    const onNeedRefresh = (e: Event) => {
+      const ev = e as PwaNeedRefreshEvent
+      setUpdateFn(() => ev.detail.updateSW)
+      setHasUpdate(true)
+    }
     window.addEventListener('pwa:need-refresh', onNeedRefresh)
     return () => window.removeEventListener('pwa:need-refresh', onNeedRefresh)
   }, [])
@@ -141,10 +150,10 @@ export default function App() {
           <button
             className="update"
             type="button"
-            onClick={() => {
-              // En prompt mode, la forma más simple de aplicar el update es recargar.
-              // El nuevo SW se activará y agarrará los nuevos assets.
-              window.location.reload()
+            onClick={async () => {
+              // Aplicamos el SW nuevo y recargamos la app.
+              if (updateFn) await updateFn(true)
+              else window.location.reload()
             }}
           >
             Hay una actualización — Aplicar

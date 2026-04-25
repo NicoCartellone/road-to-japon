@@ -4,9 +4,18 @@ import { registerSW } from 'virtual:pwa-register'
 import App from './App'
 import './style.css'
 
-registerSW({
+// Guardamos el updater para poder aplicarlo desde la UI.
+let updateSW: ReturnType<typeof registerSW>
+
+updateSW = registerSW({
   onNeedRefresh() {
-    window.dispatchEvent(new Event('pwa:need-refresh'))
+    window.dispatchEvent(
+      new CustomEvent('pwa:need-refresh', {
+        detail: {
+          updateSW
+        }
+      })
+    )
   }
 })
 
