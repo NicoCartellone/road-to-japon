@@ -11,10 +11,6 @@
 
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   color: var(--text);
-  background: radial-gradient(1200px 800px at 20% 10%, #1d2a57 0%, transparent 60%),
-    radial-gradient(900px 700px at 80% 20%, #3b155a 0%, transparent 55%),
-    linear-gradient(180deg, var(--bg0), var(--bg1));
-
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -25,11 +21,19 @@ body {
   height: 100%;
 }
 
+html {
+  background: radial-gradient(1200px 800px at 20% 10%, #1d2a57 0%, transparent 60%),
+    radial-gradient(900px 700px at 80% 20%, #3b155a 0%, transparent 55%),
+    linear-gradient(180deg, var(--bg0), var(--bg1));
+  background-color: var(--bg0);
+}
+
 body {
   margin: 0;
   min-height: 100svh;
   overflow: hidden;
-  background: var(--bg0);
+  background: transparent;
+  overscroll-behavior: none;
 }
 
 #app {

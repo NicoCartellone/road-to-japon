@@ -89,6 +89,7 @@ export default function App() {
   const [remaining, setRemaining] = useState<Remaining>(() => calcRemaining(target))
   const [hasUpdate, setHasUpdate] = useState(false)
   const [updateFn, setUpdateFn] = useState<null | ((reloadPage?: boolean) => Promise<void>)>(null)
+  const [isUpdating, setIsUpdating] = useState(false)
 
   useEffect(() => {
     const id = window.setInterval(() => setRemaining(calcRemaining(target)), 250)
@@ -151,12 +152,33 @@ export default function App() {
             className="update"
             type="button"
             onClick={async () => {
-              // Aplicamos el SW nuevo y recargamos la app.
-              if (updateFn) await updateFn(true)
-              else window.location.reload()
+              // En algunos navegadores (especialmente iOS) el "reload" automático
+              // puede no ejecutarse aunque el SW nuevo quede en waiting.
+              // Estrategia robusta: pedir skipWaiting y luego recargar nosotros.
+              setIsUpdating(true)
+
+              const waitForControllerChange = (timeoutMs = 1500) =>
+                new Promise<void>((resolve) => {
+                  if (!('serviceWorker' in navigator)) return resolve()
+                  const sw = navigator.serviceWorker
+                  const onChange = () => resolve()
+                  sw.addEventListener('controllerchange', onChange, { once: true })
+                  window.setTimeout(resolve, timeoutMs)
+                })
+
+              try {
+                if (updateFn) {
+                  // NO le pedimos que recargue automáticamente.
+                  await updateFn(false)
+                  await waitForControllerChange()
+                }
+              } finally {
+                window.location.reload()
+              }
             }}
+            disabled={isUpdating}
           >
-            Hay una actualización — Aplicar
+            {isUpdating ? 'Actualizando…' : 'Hay una actualización — Aplicar'}
           </button>
         ) : null}
       </section>
