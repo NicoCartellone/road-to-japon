@@ -108,84 +108,119 @@ export default function App() {
 
   return (
     <main className="shell">
-      <header className="header">
-        <div className="badge">🇯🇵 Road to Japón</div>
-        <h1>Cuenta regresiva</h1>
-        <p className="sub">
-          Falta cada vez menos para el vuelo del <strong>9 de enero de 2027</strong> a las <strong>23:00</strong> (Buenos
-          Aires).
-        </p>
-      </header>
+      <div className="content">
+        <header className="header">
+          <div className="badge">🇯🇵 Road to Japón</div>
+          <h1>Cuenta regresiva</h1>
+          <p className="sub">
+            Falta cada vez menos para el vuelo del <strong>9 de enero de 2027</strong> a las <strong>23:00</strong> (Buenos
+            Aires).
+          </p>
+        </header>
 
-      <section className="card" aria-label="Cuenta regresiva">
-        {!remaining.done ? (
-          <div className="count" role="timer" aria-live="polite">
-            <div className="cell">
-              <span className="num">{remaining.dd}</span>
-              <span className="lbl">días</span>
+        <section className="card" aria-label="Cuenta regresiva">
+          {!remaining.done ? (
+            <div className="count" role="timer" aria-live="polite">
+              <div className="cell">
+                <span className="num">{remaining.dd}</span>
+                <span className="lbl">días</span>
+              </div>
+              <div className="sep">:</div>
+              <div className="cell">
+                <span className="num">{pad2(remaining.hh)}</span>
+                <span className="lbl">horas</span>
+              </div>
+              <div className="sep">:</div>
+              <div className="cell">
+                <span className="num">{pad2(remaining.mm)}</span>
+                <span className="lbl">min</span>
+              </div>
+              <div className="sep">:</div>
+              <div className="cell">
+                <span className="num">{pad2(remaining.ss)}</span>
+                <span className="lbl">seg</span>
+              </div>
             </div>
-            <div className="sep">:</div>
-            <div className="cell">
-              <span className="num">{pad2(remaining.hh)}</span>
-              <span className="lbl">horas</span>
+          ) : (
+            <div className="done">
+              <h2>¡Buen viaje!</h2>
+              <p>Nos vemos en Japón.</p>
             </div>
-            <div className="sep">:</div>
-            <div className="cell">
-              <span className="num">{pad2(remaining.mm)}</span>
-              <span className="lbl">min</span>
-            </div>
-            <div className="sep">:</div>
-            <div className="cell">
-              <span className="num">{pad2(remaining.ss)}</span>
-              <span className="lbl">seg</span>
-            </div>
-          </div>
-        ) : (
-          <div className="done">
-            <h2>¡Buen viaje!</h2>
-            <p>Nos vemos en Japón.</p>
-          </div>
-        )}
+          )}
 
-        {hasUpdate ? (
-          <button
-            className="update"
-            type="button"
-            onClick={async () => {
-              // En algunos navegadores (especialmente iOS) el "reload" automático
-              // puede no ejecutarse aunque el SW nuevo quede en waiting.
-              // Estrategia robusta: pedir skipWaiting y luego recargar nosotros.
-              setIsUpdating(true)
+          {hasUpdate ? (
+            <button
+              className="update"
+              type="button"
+              onClick={async () => {
+                // En algunos navegadores (especialmente iOS) el "reload" automático
+                // puede no ejecutarse aunque el SW nuevo quede en waiting.
+                // Estrategia robusta: pedir skipWaiting y luego recargar nosotros.
+                setIsUpdating(true)
 
-              const waitForControllerChange = (timeoutMs = 1500) =>
-                new Promise<void>((resolve) => {
-                  if (!('serviceWorker' in navigator)) return resolve()
-                  const sw = navigator.serviceWorker
-                  const onChange = () => resolve()
-                  sw.addEventListener('controllerchange', onChange, { once: true })
-                  window.setTimeout(resolve, timeoutMs)
-                })
+                const waitForControllerChange = (timeoutMs = 1500) =>
+                  new Promise<void>((resolve) => {
+                    if (!('serviceWorker' in navigator)) return resolve()
+                    const sw = navigator.serviceWorker
+                    const onChange = () => resolve()
+                    sw.addEventListener('controllerchange', onChange, { once: true })
+                    window.setTimeout(resolve, timeoutMs)
+                  })
 
-              try {
-                if (updateFn) {
-                  // NO le pedimos que recargue automáticamente.
-                  await updateFn(false)
-                  await waitForControllerChange()
+                try {
+                  if (updateFn) {
+                    // NO le pedimos que recargue automáticamente.
+                    await updateFn(false)
+                    await waitForControllerChange()
+                  }
+                } finally {
+                  window.location.reload()
                 }
-              } finally {
-                window.location.reload()
-              }
-            }}
-            disabled={isUpdating}
-          >
-            {isUpdating ? 'Actualizando…' : 'Hay una actualización — Aplicar'}
-          </button>
-        ) : null}
-      </section>
+              }}
+              disabled={isUpdating}
+            >
+              {isUpdating ? 'Actualizando…' : 'Hay una actualización — Aplicar'}
+            </button>
+          ) : null}
+        </section>
 
-      <footer className="footer">
-        <small>Tip: agregala a tu pantalla de inicio para usarla como app.</small>
-      </footer>
+        <footer className="footer">
+          <small>Tip: agregala a tu pantalla de inicio para usarla como app.</small>
+        </footer>
+      </div>
+
+      <nav className="bottom-nav" aria-label="Navegación">
+        <button type="button" className="nav-btn is-active" aria-label="Inicio">
+          <svg viewBox="0 0 24 24" aria-hidden="true" className="nav-ico">
+            <path
+              fill="currentColor"
+              d="M12 3.1 3.5 10.3a1 1 0 0 0-.35.76V20a1.5 1.5 0 0 0 1.5 1.5H9a1 1 0 0 0 1-1v-5.5h4V20.5a1 1 0 0 0 1 1h4.35A1.5 1.5 0 0 0 20.85 20v-8.94a1 1 0 0 0-.35-.76L12 3.1Z"
+            />
+          </svg>
+        </button>
+        <button type="button" className="nav-btn" aria-label="Lista">
+          <svg viewBox="0 0 24 24" aria-hidden="true" className="nav-ico">
+            <path fill="currentColor" d="M7 6.5h14v2H7v-2Zm0 5h14v2H7v-2Zm0 5h14v2H7v-2Z" />
+            <path fill="currentColor" d="M3 7a1.5 1.5 0 1 0 3 0 1.5 1.5 0 0 0-3 0Zm0 5a1.5 1.5 0 1 0 3 0 1.5 1.5 0 0 0-3 0Zm0 5a1.5 1.5 0 1 0 3 0 1.5 1.5 0 0 0-3 0Z" />
+          </svg>
+        </button>
+        <button type="button" className="nav-btn" aria-label="Mapa">
+          <svg viewBox="0 0 24 24" aria-hidden="true" className="nav-ico">
+            <path
+              fill="currentColor"
+              d="M12 2.75c-3.6 0-6.5 2.86-6.5 6.38 0 4.77 5.2 10.62 6.16 11.67a.5.5 0 0 0 .68 0c.96-1.05 6.16-6.9 6.16-11.67 0-3.52-2.9-6.38-6.5-6.38Zm0 9.1a2.75 2.75 0 1 1 0-5.5 2.75 2.75 0 0 1 0 5.5Z"
+            />
+          </svg>
+        </button>
+        <button type="button" className="nav-btn" aria-label="Perfil">
+          <svg viewBox="0 0 24 24" aria-hidden="true" className="nav-ico">
+            <path
+              fill="currentColor"
+              d="M12 12.2a4.3 4.3 0 1 0-4.3-4.3 4.3 4.3 0 0 0 4.3 4.3Zm0 2.1c-4.06 0-7.35 2.2-7.35 4.9 0 .5.4.9.9.9h12.9c.5 0 .9-.4.9-.9 0-2.7-3.29-4.9-7.35-4.9Z"
+            />
+          </svg>
+        </button>
+      </nav>
     </main>
   )
 }

@@ -74,10 +74,17 @@ body::before {
 .shell {
   height: 100%;
   display: grid;
-  place-items: center;
   padding: 24px;
   padding-top: calc(24px + env(safe-area-inset-top));
   padding-bottom: calc(24px + env(safe-area-inset-bottom));
+}
+
+.content {
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+  display: grid;
+  place-items: center;
 }
 
 .header {
@@ -198,6 +205,53 @@ h1 {
   color: rgba(255, 255, 255, 0.5);
 }
 
+.bottom-nav {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(14px + env(safe-area-inset-bottom));
+  width: min(520px, calc(100% - 32px));
+  height: 64px;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  align-items: center;
+  padding: 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(12px);
+}
+
+.nav-btn {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.65);
+  height: 44px;
+  width: 44px;
+  margin: 0 auto;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+}
+
+.nav-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.nav-btn.is-active {
+  color: rgba(255, 255, 255, 0.95);
+  background: rgba(124, 58, 237, 0.22);
+  border: 1px solid rgba(124, 58, 237, 0.35);
+}
+
+.nav-ico {
+  width: 22px;
+  height: 22px;
+}
+
 @media (max-width: 560px) {
   .shell {
     padding: 18px;
@@ -216,6 +270,10 @@ h1 {
   .cell {
     width: 100%;
     max-width: 440px;
+  }
+
+  .bottom-nav {
+    width: min(520px, calc(100% - 24px));
   }
 
   .sep {
