@@ -245,6 +245,8 @@ h1 {
   border: 1px solid rgba(255, 255, 255, 0.16);
   background: rgba(255, 255, 255, 0.06);
   color: var(--title);
+  /* iOS Safari: evita auto-zoom al enfocar inputs <16px */
+  font-size: 16px;
   outline: none;
 }
 
