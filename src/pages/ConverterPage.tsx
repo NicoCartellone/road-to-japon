@@ -27,7 +27,12 @@ export default function ConverterPage() {
   return (
     <div className="page">
       <header className="header">
-        <div className="badge">💱 Conversor</div>
+        <div className="badge">
+          <span className="badge-emoji" aria-hidden="true">
+            💱
+          </span>
+          <span className="badge-text">Conversor</span>
+        </div>
         <h1>Conversor</h1>
         <p className="sub">Convertí precios en yenes para tener referencia en USD y ARS (dólar blue).</p>
       </header>
@@ -47,8 +52,7 @@ export default function ConverterPage() {
               onChange={(e) => setJpyText(e.target.value)}
             />
             <div className="conv-hint">
-              Cotizaciones hardcodeadas (al {RATES_AS_OF}): 1 USD = {round2(JPY_PER_USD)} JPY · 1 USD = {ARS_PER_USD_BLUE}{' '}
-              ARS (blue)
+              Cotizaciones (al {RATES_AS_OF}): 1 USD = {round2(JPY_PER_USD)} JPY · 1 USD = {ARS_PER_USD_BLUE} ARS (blue)
             </div>
           </div>
 
