@@ -427,14 +427,21 @@ h1 {
 
 .phrase-item {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: center;
+  gap: 12px;
   padding: 12px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .phrase-item:last-child {
   border-bottom: none;
+}
+
+.phrase-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .phrase-jp {
@@ -452,6 +459,35 @@ h1 {
 .phrase-es {
   font-size: 13px;
   color: var(--muted);
+}
+
+.phrase-speak {
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--muted);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+.phrase-speak:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--title);
+}
+
+.phrase-speak--active {
+  background: rgba(124, 58, 237, 0.22);
+  border-color: rgba(124, 58, 237, 0.45);
+  color: #c4b5fd;
+}
+
+.phrase-speak svg {
+  width: 20px;
+  height: 20px;
 }
 
 .update-bar {

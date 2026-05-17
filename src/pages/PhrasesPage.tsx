@@ -69,11 +69,32 @@ const CATEGORIES: Category[] = [
   },
 ]
 
+function speak(text: string, onDone: () => void): void {
+  if (!('speechSynthesis' in window)) return
+  window.speechSynthesis.cancel()
+  const utterance = new SpeechSynthesisUtterance(text)
+  utterance.lang = 'ja-JP'
+  utterance.onend = onDone
+  utterance.onerror = onDone
+  window.speechSynthesis.speak(utterance)
+}
+
 export default function PhrasesPage() {
   const [open, setOpen] = useState<string | null>('saludos')
+  const [speaking, setSpeaking] = useState<string | null>(null)
 
   function toggle(id: string) {
     setOpen((prev) => (prev === id ? null : id))
+  }
+
+  function handleSpeak(jp: string) {
+    if (speaking === jp) {
+      window.speechSynthesis.cancel()
+      setSpeaking(null)
+      return
+    }
+    setSpeaking(jp)
+    speak(jp, () => setSpeaking(null))
   }
 
   return (
@@ -112,13 +133,37 @@ export default function PhrasesPage() {
 
               {isOpen && (
                 <ul className="phrase-items" role="list">
-                  {cat.phrases.map((p) => (
-                    <li key={p.romaji} className="phrase-item">
-                      <span className="phrase-jp">{p.jp}</span>
-                      <span className="phrase-romaji">{p.romaji}</span>
-                      <span className="phrase-es">{p.es}</span>
-                    </li>
-                  ))}
+                  {cat.phrases.map((p) => {
+                    const isActive = speaking === p.jp
+                    return (
+                      <li key={p.romaji} className="phrase-item">
+                        <div className="phrase-text">
+                          <span className="phrase-jp">{p.jp}</span>
+                          <span className="phrase-romaji">{p.romaji}</span>
+                          <span className="phrase-es">{p.es}</span>
+                        </div>
+                        <button
+                          className={`phrase-speak${isActive ? ' phrase-speak--active' : ''}`}
+                          onClick={() => handleSpeak(p.jp)}
+                          aria-label={`Escuchar: ${p.es}`}
+                        >
+                          <svg viewBox="0 0 24 24" aria-hidden="true">
+                            {isActive ? (
+                              <path
+                                fill="currentColor"
+                                d="M6 6h12v12H6z"
+                              />
+                            ) : (
+                              <path
+                                fill="currentColor"
+                                d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"
+                              />
+                            )}
+                          </svg>
+                        </button>
+                      </li>
+                    )
+                  })}
                 </ul>
               )}
             </div>
