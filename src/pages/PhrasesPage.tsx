@@ -77,7 +77,7 @@ export default function PhrasesPage() {
   }
 
   return (
-    <div className="page">
+    <div className="page page--scrollable">
       <header className="header">
         <div className="badge">
           <span className="badge-emoji">🗣️</span>
