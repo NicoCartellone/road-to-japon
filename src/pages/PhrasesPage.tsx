@@ -98,7 +98,7 @@ function speak(text: string, onDone: () => void): void {
 }
 
 export default function PhrasesPage() {
-  const [open, setOpen] = useState<string | null>('saludos')
+  const [open, setOpen] = useState<string | null>(null)
   const [speaking, setSpeaking] = useState<string | null>(null)
 
   function toggle(id: string) {
