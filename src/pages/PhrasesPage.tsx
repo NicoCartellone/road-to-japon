@@ -27,6 +27,7 @@ const CATEGORIES: Category[] = [
       { jp: 'お水をください', romaji: 'Omizu wo kudasai', es: 'Agua, por favor' },
       { jp: 'お会計をお願いします', romaji: 'Okaikei wo onegaishimasu', es: 'La cuenta, por favor' },
       { jp: 'おいしい！', romaji: 'Oishii!', es: '¡Está rico!' },
+      { jp: 'おすすめは何ですか？', romaji: 'Osusume wa nan desu ka?', es: '¿Cuál es la recomendación de la casa?' },
       { jp: 'アレルギーがあります', romaji: 'Arerugii ga arimasu', es: 'Tengo alergia' },
     ],
   },
