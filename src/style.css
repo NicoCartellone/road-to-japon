@@ -502,6 +502,121 @@ h1 {
   height: 20px;
 }
 
+.cl-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  width: min(860px, 100%);
+}
+
+.cl-tab {
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid var(--card-border);
+  background: var(--card);
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.cl-tab--active {
+  background: rgba(124, 58, 237, 0.22);
+  border-color: rgba(124, 58, 237, 0.45);
+  color: var(--title);
+}
+
+.cl-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cl-progress {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cl-progress-text {
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.cl-bar {
+  flex: 1;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.cl-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent);
+  transition: width 0.3s ease;
+}
+
+.cl-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.cl-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+}
+
+.cl-list li:last-child .cl-item {
+  border-bottom: none;
+}
+
+.cl-item--done .cl-text {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+.cl-box {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.05);
+  display: grid;
+  place-items: center;
+}
+
+.cl-box--checked {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+.cl-box svg {
+  width: 15px;
+  height: 15px;
+}
+
+.cl-text {
+  font-size: 15px;
+  line-height: 1.4;
+}
+
 .update-bar {
   position: fixed;
   left: 50%;
