@@ -52,5 +52,23 @@ Ahí vas a encontrar:
   - `VITE_FIREBASE_MEASUREMENT_ID`
 - Importante: en Vite, las variables del cliente deben comenzar con `VITE_`.
 
+## Checklist (Firestore) — permisos
+Si ves errores tipo `permission-denied` en producción, es por las **Firestore Rules**.
+
+Para una demo simple (NO recomendado si la app es pública), podés permitir solo el doc usado:
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /checklist/state {
+      allow read, write: if true;
+    }
+  }
+}
+```
+
+Recomendación mínima: exigir auth (por ejemplo, anonymous) y en Rules:
+`allow read, write: if request.auth != null;`
+
 ## Notas (iOS/PWA)
 Hay fixes específicos para iOS (safe-areas, status bar y evitar bounce/scroll). Si tocás layout global o PWA, probá en iOS.

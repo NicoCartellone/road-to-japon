@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { doc, onSnapshot, setDoc } from 'firebase/firestore'
+import type { FirebaseError } from 'firebase/app'
 import { db } from '../lib/firebase'
 
 type ItemDef = { id: string; text: string }
@@ -45,19 +46,47 @@ export default function ChecklistPage() {
   const [section, setSection] = useState<Section>('tareas')
   const [checked, setChecked] = useState<Record<string, boolean>>({})
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const unsub = onSnapshot(DOC_REF, (snap) => {
-      setChecked((snap.data()?.checked as Record<string, boolean>) ?? {})
-      setLoading(false)
-    })
+    const unsub = onSnapshot(
+      DOC_REF,
+      (snap) => {
+        setChecked((snap.data()?.checked as Record<string, boolean>) ?? {})
+        setError(null)
+        setLoading(false)
+      },
+      (err) => {
+        const e = err as FirebaseError
+        // En producción, si las Rules de Firestore no permiten read/write,
+        // esto aparece como permission-denied.
+        if (e?.code === 'permission-denied') {
+          setError('No hay permisos para leer la checklist. Revisá las Firestore Rules (permission-denied).')
+        } else {
+          setError('Error al cargar la checklist.')
+        }
+        setLoading(false)
+      }
+    )
     return unsub
   }, [])
 
   async function toggle(id: string) {
     const next = { ...checked, [id]: !checked[id] }
     setChecked(next)
-    await setDoc(DOC_REF, { checked: next }, { merge: true })
+    try {
+      await setDoc(DOC_REF, { checked: next }, { merge: true })
+      setError(null)
+    } catch (err) {
+      const e = err as FirebaseError
+      if (e?.code === 'permission-denied') {
+        setError('No hay permisos para actualizar la checklist. Revisá las Firestore Rules (permission-denied).')
+      } else {
+        setError('Error al actualizar la checklist.')
+      }
+      // Revertimos el optimistic update
+      setChecked(checked)
+    }
   }
 
   const items = ITEMS[section]
@@ -102,7 +131,11 @@ export default function ChecklistPage() {
           </div>
         </div>
 
-        {loading ? (
+        {error ? (
+          <p className="sub" style={{ margin: '16px 0 0', textAlign: 'center' }}>
+            {error}
+          </p>
+        ) : loading ? (
           <p className="sub" style={{ margin: '16px 0 0', textAlign: 'center' }}>
             Cargando…
           </p>
