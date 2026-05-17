@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { doc, onSnapshot, setDoc } from 'firebase/firestore'
 import type { FirebaseError } from 'firebase/app'
 import { db } from '../lib/firebase'
+import { ensureAnonymousAuth } from '../lib/auth'
 
 type ItemDef = { id: string; text: string }
 type Section = 'tareas' | 'equipaje'
@@ -49,32 +50,50 @@ export default function ChecklistPage() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const unsub = onSnapshot(
-      DOC_REF,
-      (snap) => {
-        setChecked((snap.data()?.checked as Record<string, boolean>) ?? {})
-        setError(null)
+    let unsub: null | (() => void) = null
+    let cancelled = false
+
+    setLoading(true)
+
+    ensureAnonymousAuth()
+      .then(() => {
+        if (cancelled) return
+
+        unsub = onSnapshot(
+          DOC_REF,
+          (snap) => {
+            setChecked((snap.data()?.checked as Record<string, boolean>) ?? {})
+            setError(null)
+            setLoading(false)
+          },
+          (err) => {
+            const e = err as FirebaseError
+            if (e?.code === 'permission-denied') {
+              setError('No hay permisos para leer la checklist. Revisá las Firestore Rules (permission-denied).')
+            } else {
+              setError('Error al cargar la checklist.')
+            }
+            setLoading(false)
+          }
+        )
+      })
+      .catch(() => {
+        if (cancelled) return
+        setError('No se pudo autenticar para cargar la checklist.')
         setLoading(false)
-      },
-      (err) => {
-        const e = err as FirebaseError
-        // En producción, si las Rules de Firestore no permiten read/write,
-        // esto aparece como permission-denied.
-        if (e?.code === 'permission-denied') {
-          setError('No hay permisos para leer la checklist. Revisá las Firestore Rules (permission-denied).')
-        } else {
-          setError('Error al cargar la checklist.')
-        }
-        setLoading(false)
-      }
-    )
-    return unsub
+      })
+
+    return () => {
+      cancelled = true
+      if (unsub) unsub()
+    }
   }, [])
 
   async function toggle(id: string) {
     const next = { ...checked, [id]: !checked[id] }
     setChecked(next)
     try {
+      await ensureAnonymousAuth()
       await setDoc(DOC_REF, { checked: next }, { merge: true })
       setError(null)
     } catch (err) {
