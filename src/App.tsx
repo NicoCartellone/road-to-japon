@@ -4,6 +4,7 @@ import ChecklistPage from './pages/ChecklistPage'
 import ConverterPage from './pages/ConverterPage'
 import HomePage from './pages/HomePage'
 import ItineraryPage from './pages/ItineraryPage'
+import PhrasesPage from './pages/PhrasesPage'
 import BottomNav from './shared/ui/BottomNav'
 
 const TARGET = {
@@ -116,6 +117,7 @@ export default function App() {
           <Route path="/checklist" element={<ChecklistPage />} />
           <Route path="/itinerario" element={<ItineraryPage />} />
           <Route path="/conversor" element={<ConverterPage />} />
+          <Route path="/frases" element={<PhrasesPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
