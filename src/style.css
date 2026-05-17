@@ -423,6 +423,9 @@ h1 {
   flex-direction: column;
   gap: 2px;
   border-top: 1px solid var(--card-border);
+  max-height: 48vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .phrase-item {
