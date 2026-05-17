@@ -3,6 +3,12 @@
   command = "npm run build"
   publish = "dist"
 
+  [build.environment]
+    # Netlify Secrets Scanning: evita falso positivo.
+    # En este repo el valor de VITE_FIREBASE_PROJECT_ID coincide con textos del proyecto
+    # (p.ej. package.json), y Netlify falla el build al detectarlo como "secreto".
+    SECRETS_SCAN_OMIT_KEYS = "VITE_FIREBASE_PROJECT_ID"
+
 [[redirects]]
   from = "/*"
   to = "/index.html"

@@ -42,6 +42,15 @@ Ahí vas a encontrar:
 - La rama de deploy es **`main`**.
 - Este proyecto usa BrowserRouter, por eso existe un redirect SPA:
   - `netlify.toml`: `/* -> /index.html (200)`
+- Configurá estas variables en **Site configuration → Environment variables**:
+  - `VITE_FIREBASE_API_KEY`
+  - `VITE_FIREBASE_AUTH_DOMAIN`
+  - `VITE_FIREBASE_PROJECT_ID`
+  - `VITE_FIREBASE_STORAGE_BUCKET`
+  - `VITE_FIREBASE_MESSAGING_SENDER_ID`
+  - `VITE_FIREBASE_APP_ID`
+  - `VITE_FIREBASE_MEASUREMENT_ID`
+- Importante: en Vite, las variables del cliente deben comenzar con `VITE_`.
 
 ## Notas (iOS/PWA)
 Hay fixes específicos para iOS (safe-areas, status bar y evitar bounce/scroll). Si tocás layout global o PWA, probá en iOS.
