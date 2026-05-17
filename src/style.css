@@ -66,6 +66,18 @@ body::before {
   z-index: 10;
 }
 
+body::after {
+  content: '';
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: calc(env(safe-area-inset-bottom) + 110px);
+  background: linear-gradient(to top, rgba(11, 16, 32, 0.80), rgba(11, 16, 32, 0));
+  pointer-events: none;
+  z-index: 9;
+}
+
 #app {
   height: 100%;
   overflow: hidden;
@@ -86,6 +98,7 @@ body::before {
   max-width: 860px;
   margin: 0 auto;
   flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -351,6 +364,257 @@ h1 {
   width: 22px;
   height: 22px;
   display: block;
+}
+
+.page--scrollable {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.phrases-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: min(860px, 100%);
+}
+
+.phrase-cat {
+  padding: 0;
+  overflow: hidden;
+}
+
+.phrase-cat-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: transparent;
+  border: none;
+  color: var(--title);
+  cursor: pointer;
+  text-align: left;
+}
+
+.phrase-cat-header:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.phrase-cat-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.phrase-cat-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.phrase-chevron {
+  width: 20px;
+  height: 20px;
+  color: var(--muted);
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.phrase-chevron--open {
+  transform: rotate(180deg);
+}
+
+.phrase-items {
+  list-style: none;
+  margin: 0;
+  padding: 0 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-top: 1px solid var(--card-border);
+}
+
+.phrase-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.phrase-item:last-child {
+  border-bottom: none;
+}
+
+.phrase-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.phrase-jp {
+  font-size: 20px;
+  color: var(--title);
+  line-height: 1.3;
+}
+
+.phrase-romaji {
+  font-size: 13px;
+  color: #c4b5fd;
+  font-style: italic;
+}
+
+.phrase-es {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.phrase-speak {
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--muted);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+.phrase-speak:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--title);
+}
+
+.phrase-speak--active {
+  background: rgba(124, 58, 237, 0.22);
+  border-color: rgba(124, 58, 237, 0.45);
+  color: #c4b5fd;
+}
+
+.phrase-speak svg {
+  width: 20px;
+  height: 20px;
+}
+
+.cl-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  width: min(860px, 100%);
+}
+
+.cl-tab {
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid var(--card-border);
+  background: var(--card);
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.cl-tab--active {
+  background: rgba(124, 58, 237, 0.22);
+  border-color: rgba(124, 58, 237, 0.45);
+  color: var(--title);
+}
+
+.cl-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cl-progress {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cl-progress-text {
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.cl-bar {
+  flex: 1;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.cl-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent);
+  transition: width 0.3s ease;
+}
+
+.cl-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.cl-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+}
+
+.cl-list li:last-child .cl-item {
+  border-bottom: none;
+}
+
+.cl-item--done .cl-text {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+.cl-box {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.05);
+  display: grid;
+  place-items: center;
+}
+
+.cl-box--checked {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+.cl-box svg {
+  width: 15px;
+  height: 15px;
+}
+
+.cl-text {
+  font-size: 15px;
+  line-height: 1.4;
 }
 
 .update-bar {
