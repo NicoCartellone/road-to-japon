@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { doc, onSnapshot, setDoc } from 'firebase/firestore'
 import type { FirebaseError } from 'firebase/app'
 import { db } from '../lib/firebase'
@@ -46,8 +46,11 @@ const DOC_REF = doc(db, 'checklist', 'state')
 export default function ChecklistPage() {
   const [section, setSection] = useState<Section>('tareas')
   const [checked, setChecked] = useState<Record<string, boolean>>({})
+  const [custom, setCustom] = useState<Record<Section, ItemDef[]>>({ tareas: [], equipaje: [] })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [newText, setNewText] = useState('')
+  const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     let unsub: null | (() => void) = null
@@ -62,7 +65,9 @@ export default function ChecklistPage() {
         unsub = onSnapshot(
           DOC_REF,
           (snap) => {
-            setChecked((snap.data()?.checked as Record<string, boolean>) ?? {})
+            const data = snap.data()
+            setChecked((data?.checked as Record<string, boolean>) ?? {})
+            setCustom((data?.custom as Record<Section, ItemDef[]>) ?? { tareas: [], equipaje: [] })
             setError(null)
             setLoading(false)
           },
@@ -108,8 +113,36 @@ export default function ChecklistPage() {
     }
   }
 
-  const items = ITEMS[section]
-  const done = items.filter((i) => checked[i.id]).length
+  async function addItem() {
+    const text = newText.trim()
+    if (!text) return
+    const id = `c_${Date.now()}`
+    const nextCustom = {
+      ...custom,
+      [section]: [...(custom[section] ?? []), { id, text }],
+    }
+    setCustom(nextCustom)
+    setNewText('')
+    inputRef.current?.focus()
+    try {
+      await ensureAnonymousAuth()
+      await setDoc(DOC_REF, { custom: nextCustom }, { merge: true })
+      setError(null)
+    } catch (err) {
+      const e = err as FirebaseError
+      if (e?.code === 'permission-denied') {
+        setError('No hay permisos para agregar ítems. Revisá las Firestore Rules (permission-denied).')
+      } else {
+        setError('Error al guardar el ítem.')
+      }
+      setCustom(custom)
+    }
+  }
+
+  const staticItems = ITEMS[section]
+  const customItems = custom[section] ?? []
+  const allItems = [...staticItems, ...customItems]
+  const done = allItems.filter((i) => checked[i.id]).length
 
   return (
     <div className="page page--scrollable">
@@ -140,12 +173,12 @@ export default function ChecklistPage() {
       <div className="card cl-card">
         <div className="cl-progress">
           <span className="cl-progress-text">
-            {done} / {items.length}
+            {done} / {allItems.length}
           </span>
           <div className="cl-bar">
             <div
               className="cl-bar-fill"
-              style={{ width: `${(done / items.length) * 100}%` }}
+              style={{ width: allItems.length ? `${(done / allItems.length) * 100}%` : '0%' }}
             />
           </div>
         </div>
@@ -159,30 +192,57 @@ export default function ChecklistPage() {
             Cargando…
           </p>
         ) : (
-          <ul className="cl-list" role="list">
-            {items.map((item) => {
-              const isChecked = !!checked[item.id]
-              return (
-                <li key={item.id}>
-                  <button
-                    className={`cl-item${isChecked ? ' cl-item--done' : ''}`}
-                    onClick={() => toggle(item.id)}
-                    role="checkbox"
-                    aria-checked={isChecked}
-                  >
-                    <span className={`cl-box${isChecked ? ' cl-box--checked' : ''}`}>
-                      {isChecked && (
-                        <svg viewBox="0 0 24 24" aria-hidden="true">
-                          <path fill="currentColor" d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17Z" />
-                        </svg>
-                      )}
-                    </span>
-                    <span className="cl-text">{item.text}</span>
-                  </button>
-                </li>
-              )
-            })}
-          </ul>
+          <>
+            <ul className="cl-list" role="list">
+              {allItems.map((item) => {
+                const isChecked = !!checked[item.id]
+                return (
+                  <li key={item.id}>
+                    <button
+                      className={`cl-item${isChecked ? ' cl-item--done' : ''}`}
+                      onClick={() => toggle(item.id)}
+                      role="checkbox"
+                      aria-checked={isChecked}
+                    >
+                      <span className={`cl-box${isChecked ? ' cl-box--checked' : ''}`}>
+                        {isChecked && (
+                          <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path fill="currentColor" d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17Z" />
+                          </svg>
+                        )}
+                      </span>
+                      <span className="cl-text">{item.text}</span>
+                    </button>
+                  </li>
+                )
+              })}
+            </ul>
+
+            <form
+              className="cl-add"
+              onSubmit={(e) => { e.preventDefault(); addItem() }}
+            >
+              <input
+                ref={inputRef}
+                className="cl-add-input"
+                type="text"
+                placeholder="Agregar ítem…"
+                value={newText}
+                onChange={(e) => setNewText(e.target.value)}
+                maxLength={80}
+              />
+              <button
+                className="cl-add-btn"
+                type="submit"
+                disabled={!newText.trim()}
+                aria-label="Agregar"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2Z" />
+                </svg>
+              </button>
+            </form>
+          </>
         )}
       </div>
     </div>
