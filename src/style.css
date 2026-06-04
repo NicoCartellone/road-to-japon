@@ -90,7 +90,7 @@ body::after {
   padding: 24px;
   padding-top: calc(24px + env(safe-area-inset-top));
   /* Dejá aire para la bottom-nav + safe-area */
-  padding-bottom: calc(24px + env(safe-area-inset-bottom) + 88px);
+  padding-bottom: calc(16px + env(safe-area-inset-bottom) + 88px);
 }
 
 .content {
@@ -321,7 +321,7 @@ h1 {
   position: fixed;
   left: 50%;
   transform: translateX(-50%);
-  bottom: calc(14px + env(safe-area-inset-bottom));
+  bottom: calc(6px + env(safe-area-inset-bottom));
   width: min(520px, calc(100% - 32px));
   height: 64px;
   display: grid;
@@ -898,7 +898,7 @@ h1 {
   position: fixed;
   left: 50%;
   transform: translateX(-50%);
-  bottom: calc(14px + env(safe-area-inset-bottom) + 64px + 10px);
+  bottom: calc(6px + env(safe-area-inset-bottom) + 64px + 10px);
   width: min(520px, calc(100% - 32px));
   display: grid;
   justify-items: center;
