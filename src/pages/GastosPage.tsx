@@ -3,6 +3,7 @@ import { doc, onSnapshot, setDoc } from 'firebase/firestore'
 import type { FirebaseError } from 'firebase/app'
 import { db } from '../lib/firebase'
 import { ensureAnonymousAuth } from '../lib/auth'
+import ConfirmDialog from '../shared/ui/ConfirmDialog'
 
 type Persona = { id: string; name: string }
 type Gasto = { id: string; desc: string; amount: number; paidBy: string; date: number }
@@ -64,6 +65,7 @@ export default function GastosPage() {
   const [paidBy, setPaidBy] = useState('p1')
   const [editingPersona, setEditingPersona] = useState<string | null>(null)
   const [personaDraft, setPersonaDraft] = useState('')
+  const [confirmPending, setConfirmPending] = useState<{ action: () => void } | null>(null)
 
   useEffect(() => {
     let unsub: null | (() => void) = null
@@ -287,7 +289,7 @@ export default function GastosPage() {
                 </div>
                 <div className="gasto-item-right">
                   <span className="gasto-item-amount">¥{g.amount.toLocaleString()}</span>
-                  <button className="gasto-item-del" onClick={() => deleteGasto(g.id)} aria-label="Eliminar">
+                  <button className="gasto-item-del" onClick={() => setConfirmPending({ action: () => deleteGasto(g.id) })} aria-label="Eliminar">
                     <svg viewBox="0 0 24 24" aria-hidden="true">
                       <path fill="currentColor" d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z" />
                     </svg>
@@ -298,6 +300,13 @@ export default function GastosPage() {
           </ul>
         </div>
       ) : null}
+      {confirmPending && (
+        <ConfirmDialog
+          message="¿Eliminar este gasto?"
+          onConfirm={() => { confirmPending.action(); setConfirmPending(null) }}
+          onCancel={() => setConfirmPending(null)}
+        />
+      )}
     </div>
   )
 }

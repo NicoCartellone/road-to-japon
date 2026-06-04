@@ -3,6 +3,7 @@ import { doc, onSnapshot, setDoc } from 'firebase/firestore'
 import type { FirebaseError } from 'firebase/app'
 import { db } from '../lib/firebase'
 import { ensureAnonymousAuth } from '../lib/auth'
+import ConfirmDialog from '../shared/ui/ConfirmDialog'
 
 type Nota = { id: string; title: string; body: string; updatedAt: number }
 
@@ -15,6 +16,7 @@ export default function NotasPage() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [draft, setDraft] = useState<{ title: string; body: string }>({ title: '', body: '' })
   const titleRef = useRef<HTMLInputElement>(null)
+  const [confirmPending, setConfirmPending] = useState<{ action: () => void } | null>(null)
 
   useEffect(() => {
     let unsub: null | (() => void) = null
@@ -144,7 +146,7 @@ export default function NotasPage() {
                     />
                     <div className="nota-actions">
                       <button className="nota-save" onClick={saveEdit}>Guardar</button>
-                      <button className="nota-delete" onClick={() => deleteNota(nota.id)}>Eliminar</button>
+                      <button className="nota-delete" onClick={() => setConfirmPending({ action: () => deleteNota(nota.id) })}>Eliminar</button>
                     </div>
                   </>
                 ) : (
@@ -161,6 +163,13 @@ export default function NotasPage() {
             )
           })}
         </div>
+      )}
+      {confirmPending && (
+        <ConfirmDialog
+          message="¿Eliminar esta nota?"
+          onConfirm={() => { confirmPending.action(); setConfirmPending(null) }}
+          onCancel={() => setConfirmPending(null)}
+        />
       )}
     </div>
   )

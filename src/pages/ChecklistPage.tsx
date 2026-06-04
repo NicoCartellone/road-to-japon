@@ -3,6 +3,7 @@ import { doc, onSnapshot, setDoc } from 'firebase/firestore'
 import type { FirebaseError } from 'firebase/app'
 import { db } from '../lib/firebase'
 import { ensureAnonymousAuth } from '../lib/auth'
+import ConfirmDialog from '../shared/ui/ConfirmDialog'
 
 type ItemDef = { id: string; text: string }
 type Section = 'tareas' | 'equipaje'
@@ -51,6 +52,7 @@ export default function ChecklistPage() {
   const [error, setError] = useState<string | null>(null)
   const [newText, setNewText] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
+  const [confirmPending, setConfirmPending] = useState<{ action: () => void } | null>(null)
 
   useEffect(() => {
     let unsub: null | (() => void) = null
@@ -113,6 +115,25 @@ export default function ChecklistPage() {
     }
   }
 
+  async function deleteItem(id: string) {
+    const nextCustom = {
+      ...custom,
+      [section]: (custom[section] ?? []).filter((i) => i.id !== id),
+    }
+    const nextChecked = { ...checked }
+    delete nextChecked[id]
+    setCustom(nextCustom)
+    setChecked(nextChecked)
+    try {
+      await ensureAnonymousAuth()
+      await setDoc(DOC_REF, { custom: nextCustom, checked: nextChecked }, { merge: true })
+      setError(null)
+    } catch (err) {
+      const e = err as FirebaseError
+      setError(e?.code === 'permission-denied' ? 'Sin permisos.' : 'Error al eliminar.')
+    }
+  }
+
   async function addItem() {
     const text = newText.trim()
     if (!text) return
@@ -142,6 +163,7 @@ export default function ChecklistPage() {
   const staticItems = ITEMS[section]
   const customItems = custom[section] ?? []
   const allItems = [...staticItems, ...customItems]
+  const customIds = new Set(customItems.map((i) => i.id))
   const done = allItems.filter((i) => checked[i.id]).length
 
   return (
@@ -196,8 +218,9 @@ export default function ChecklistPage() {
             <ul className="cl-list" role="list">
               {allItems.map((item) => {
                 const isChecked = !!checked[item.id]
+                const isCustom = customIds.has(item.id)
                 return (
-                  <li key={item.id}>
+                  <li key={item.id} className={isCustom ? 'has-del' : undefined}>
                     <button
                       className={`cl-item${isChecked ? ' cl-item--done' : ''}`}
                       onClick={() => toggle(item.id)}
@@ -213,6 +236,17 @@ export default function ChecklistPage() {
                       </span>
                       <span className="cl-text">{item.text}</span>
                     </button>
+                    {isCustom && (
+                      <button
+                        className="wish-del"
+                        onClick={() => setConfirmPending({ action: () => deleteItem(item.id) })}
+                        aria-label="Eliminar"
+                      >
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                          <path fill="currentColor" d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z" />
+                        </svg>
+                      </button>
+                    )}
                   </li>
                 )
               })}
@@ -245,6 +279,13 @@ export default function ChecklistPage() {
           </>
         )}
       </div>
+      {confirmPending && (
+        <ConfirmDialog
+          message="¿Eliminar este ítem?"
+          onConfirm={() => { confirmPending.action(); setConfirmPending(null) }}
+          onCancel={() => setConfirmPending(null)}
+        />
+      )}
     </div>
   )
 }

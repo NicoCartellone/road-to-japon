@@ -3,6 +3,7 @@ import { doc, onSnapshot, setDoc } from 'firebase/firestore'
 import type { FirebaseError } from 'firebase/app'
 import { db } from '../lib/firebase'
 import { ensureAnonymousAuth } from '../lib/auth'
+import ConfirmDialog from '../shared/ui/ConfirmDialog'
 
 type Activity = { time?: string; text: string }
 type Day = {
@@ -145,6 +146,7 @@ export default function ItineraryPage() {
   const [wishLoading, setWishLoading] = useState(true)
   const [wishError, setWishError] = useState<string | null>(null)
   const [newWish, setNewWish] = useState('')
+  const [confirmPending, setConfirmPending] = useState<{ action: () => void } | null>(null)
 
   useEffect(() => {
     let unsub: null | (() => void) = null
@@ -302,7 +304,7 @@ export default function ItineraryPage() {
                       </span>
                       <span className={`wish-text${item.done ? ' wish-text--done' : ''}`}>{item.text}</span>
                     </button>
-                    <button className="wish-del" onClick={() => deleteWish(item.id)} aria-label="Eliminar">
+                    <button className="wish-del" onClick={() => setConfirmPending({ action: () => deleteWish(item.id) })} aria-label="Eliminar">
                       <svg viewBox="0 0 24 24" aria-hidden="true">
                         <path fill="currentColor" d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z" />
                       </svg>
@@ -313,6 +315,13 @@ export default function ItineraryPage() {
             </div>
           )}
         </div>
+      )}
+      {confirmPending && (
+        <ConfirmDialog
+          message="¿Eliminar este lugar?"
+          onConfirm={() => { confirmPending.action(); setConfirmPending(null) }}
+          onCancel={() => setConfirmPending(null)}
+        />
       )}
     </div>
   )
