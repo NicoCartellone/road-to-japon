@@ -48,6 +48,7 @@ export default function ChecklistPage() {
   const [section, setSection] = useState<Section>('tareas')
   const [checked, setChecked] = useState<Record<string, boolean>>({})
   const [custom, setCustom] = useState<Record<Section, ItemDef[]>>({ tareas: [], equipaje: [] })
+  const [hidden, setHidden] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [newText, setNewText] = useState('')
@@ -70,6 +71,7 @@ export default function ChecklistPage() {
             const data = snap.data()
             setChecked((data?.checked as Record<string, boolean>) ?? {})
             setCustom((data?.custom as Record<Section, ItemDef[]>) ?? { tareas: [], equipaje: [] })
+            setHidden((data?.hidden as string[]) ?? [])
             setError(null)
             setLoading(false)
           },
@@ -110,23 +112,33 @@ export default function ChecklistPage() {
       } else {
         setError('Error al actualizar la checklist.')
       }
-      // Revertimos el optimistic update
       setChecked(checked)
     }
   }
 
-  async function deleteItem(id: string) {
-    const nextCustom = {
-      ...custom,
-      [section]: (custom[section] ?? []).filter((i) => i.id !== id),
-    }
+  async function deleteItem(id: string, isCustom: boolean) {
     const nextChecked = { ...checked }
     delete nextChecked[id]
-    setCustom(nextCustom)
     setChecked(nextChecked)
+
+    let updates: Record<string, unknown> = { checked: nextChecked }
+
+    if (isCustom) {
+      const nextCustom = {
+        ...custom,
+        [section]: (custom[section] ?? []).filter((i) => i.id !== id),
+      }
+      setCustom(nextCustom)
+      updates.custom = nextCustom
+    } else {
+      const nextHidden = [...hidden, id]
+      setHidden(nextHidden)
+      updates.hidden = nextHidden
+    }
+
     try {
       await ensureAnonymousAuth()
-      await setDoc(DOC_REF, { custom: nextCustom, checked: nextChecked }, { merge: true })
+      await setDoc(DOC_REF, updates, { merge: true })
       setError(null)
     } catch (err) {
       const e = err as FirebaseError
@@ -160,10 +172,11 @@ export default function ChecklistPage() {
     }
   }
 
-  const staticItems = ITEMS[section]
-  const customItems = custom[section] ?? []
+  const hiddenSet = new Set(hidden)
+  const staticItems = ITEMS[section].filter((i) => !hiddenSet.has(i.id))
+  const customItems = (custom[section] ?? []).filter((i) => !hiddenSet.has(i.id))
   const allItems = [...staticItems, ...customItems]
-  const customIds = new Set(customItems.map((i) => i.id))
+  const customIds = new Set((custom[section] ?? []).map((i) => i.id))
   const done = allItems.filter((i) => checked[i.id]).length
 
   return (
@@ -220,7 +233,7 @@ export default function ChecklistPage() {
                 const isChecked = !!checked[item.id]
                 const isCustom = customIds.has(item.id)
                 return (
-                  <li key={item.id} className={isCustom ? 'has-del' : undefined}>
+                  <li key={item.id} className="has-del">
                     <button
                       className={`cl-item${isChecked ? ' cl-item--done' : ''}`}
                       onClick={() => toggle(item.id)}
@@ -236,17 +249,15 @@ export default function ChecklistPage() {
                       </span>
                       <span className="cl-text">{item.text}</span>
                     </button>
-                    {isCustom && (
-                      <button
-                        className="wish-del"
-                        onClick={() => setConfirmPending({ action: () => deleteItem(item.id) })}
-                        aria-label="Eliminar"
-                      >
-                        <svg viewBox="0 0 24 24" aria-hidden="true">
-                          <path fill="currentColor" d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z" />
-                        </svg>
-                      </button>
-                    )}
+                    <button
+                      className="wish-del"
+                      onClick={() => setConfirmPending({ action: () => deleteItem(item.id, isCustom) })}
+                      aria-label="Eliminar"
+                    >
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path fill="currentColor" d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z" />
+                      </svg>
+                    </button>
                   </li>
                 )
               })}
