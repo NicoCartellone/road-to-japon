@@ -149,6 +149,26 @@ const CATEGORIES: Category[] = [
   },
 ]
 
+type SearchResult = { phrase: Phrase; catLabel: string; catIcon: string }
+
+function search(query: string): SearchResult[] {
+  const q = query.toLowerCase().trim()
+  if (!q) return []
+  const results: SearchResult[] = []
+  for (const cat of CATEGORIES) {
+    for (const p of cat.phrases) {
+      if (
+        p.es.toLowerCase().includes(q) ||
+        p.romaji.toLowerCase().includes(q) ||
+        p.jp.includes(query)
+      ) {
+        results.push({ phrase: p, catLabel: cat.label, catIcon: cat.icon })
+      }
+    }
+  }
+  return results
+}
+
 function speak(text: string, onDone: () => void): void {
   if (!('speechSynthesis' in window)) return
   window.speechSynthesis.cancel()
@@ -159,13 +179,36 @@ function speak(text: string, onDone: () => void): void {
   window.speechSynthesis.speak(utterance)
 }
 
+function PhraseItem({ p, speaking, onSpeak }: { p: Phrase; speaking: string | null; onSpeak: (jp: string) => void }) {
+  const isActive = speaking === p.jp
+  return (
+    <li className="phrase-item">
+      <div className="phrase-text">
+        <span className="phrase-jp">{p.jp}</span>
+        <span className="phrase-romaji">{p.romaji}</span>
+        <span className="phrase-es">{p.es}</span>
+      </div>
+      <button
+        className={`phrase-speak${isActive ? ' phrase-speak--active' : ''}`}
+        onClick={() => onSpeak(p.jp)}
+        aria-label={`Escuchar: ${p.es}`}
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          {isActive ? (
+            <path fill="currentColor" d="M6 6h12v12H6z" />
+          ) : (
+            <path fill="currentColor" d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" />
+          )}
+        </svg>
+      </button>
+    </li>
+  )
+}
+
 export default function PhrasesPage() {
   const [open, setOpen] = useState<string | null>(null)
   const [speaking, setSpeaking] = useState<string | null>(null)
-
-  function toggle(id: string) {
-    setOpen((prev) => (prev === id ? null : id))
-  }
+  const [query, setQuery] = useState('')
 
   function handleSpeak(jp: string) {
     if (speaking === jp) {
@@ -176,6 +219,9 @@ export default function PhrasesPage() {
     setSpeaking(jp)
     speak(jp, () => setSpeaking(null))
   }
+
+  const results = search(query)
+  const isSearching = query.trim().length > 0
 
   return (
     <div className="page page--scrollable">
@@ -188,68 +234,88 @@ export default function PhrasesPage() {
         <p className="sub">Frases esenciales para el viaje, organizadas por situación.</p>
       </header>
 
-      <div className="phrases-list">
-        {CATEGORIES.map((cat) => {
-          const isOpen = open === cat.id
-          return (
-            <div key={cat.id} className="phrase-cat card">
-              <button
-                className="phrase-cat-header"
-                onClick={() => toggle(cat.id)}
-                aria-expanded={isOpen}
-              >
-                <span className="phrase-cat-title">
-                  <span className="phrase-cat-icon">{cat.icon}</span>
-                  {cat.label}
-                </span>
-                <svg
-                  className={`phrase-chevron${isOpen ? ' phrase-chevron--open' : ''}`}
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                >
-                  <path fill="currentColor" d="M7 10l5 5 5-5H7Z" />
-                </svg>
-              </button>
-
-              {isOpen && (
-                <ul className="phrase-items" role="list">
-                  {cat.phrases.map((p) => {
-                    const isActive = speaking === p.jp
-                    return (
-                      <li key={p.romaji} className="phrase-item">
-                        <div className="phrase-text">
-                          <span className="phrase-jp">{p.jp}</span>
-                          <span className="phrase-romaji">{p.romaji}</span>
-                          <span className="phrase-es">{p.es}</span>
-                        </div>
-                        <button
-                          className={`phrase-speak${isActive ? ' phrase-speak--active' : ''}`}
-                          onClick={() => handleSpeak(p.jp)}
-                          aria-label={`Escuchar: ${p.es}`}
-                        >
-                          <svg viewBox="0 0 24 24" aria-hidden="true">
-                            {isActive ? (
-                              <path
-                                fill="currentColor"
-                                d="M6 6h12v12H6z"
-                              />
-                            ) : (
-                              <path
-                                fill="currentColor"
-                                d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"
-                              />
-                            )}
-                          </svg>
-                        </button>
-                      </li>
-                    )
-                  })}
-                </ul>
-              )}
-            </div>
-          )
-        })}
+      <div className="phrase-search-wrap">
+        <svg className="phrase-search-ico" viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="currentColor" d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+        </svg>
+        <input
+          className="phrase-search"
+          type="search"
+          placeholder="Buscar en español, romaji o japonés…"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          autoComplete="off"
+          autoCorrect="off"
+          spellCheck={false}
+        />
+        {isSearching && (
+          <button className="phrase-search-clear" onClick={() => setQuery('')} aria-label="Borrar">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path fill="currentColor" d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z" />
+            </svg>
+          </button>
+        )}
       </div>
+
+      {isSearching ? (
+        results.length === 0 ? (
+          <p className="sub" style={{ textAlign: 'center' }}>Sin resultados para "{query}"</p>
+        ) : (
+          <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+            <ul className="phrase-items" role="list">
+              {results.map(({ phrase: p, catLabel, catIcon }) => (
+                <li key={p.romaji} className="phrase-item">
+                  <div className="phrase-text">
+                    <span className="phrase-cat-chip">{catIcon} {catLabel}</span>
+                    <span className="phrase-jp">{p.jp}</span>
+                    <span className="phrase-romaji">{p.romaji}</span>
+                    <span className="phrase-es">{p.es}</span>
+                  </div>
+                  <button
+                    className={`phrase-speak${speaking === p.jp ? ' phrase-speak--active' : ''}`}
+                    onClick={() => handleSpeak(p.jp)}
+                    aria-label={`Escuchar: ${p.es}`}
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      {speaking === p.jp ? (
+                        <path fill="currentColor" d="M6 6h12v12H6z" />
+                      ) : (
+                        <path fill="currentColor" d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" />
+                      )}
+                    </svg>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )
+      ) : (
+        <div className="phrases-list">
+          {CATEGORIES.map((cat) => {
+            const isOpen = open === cat.id
+            return (
+              <div key={cat.id} className="phrase-cat card">
+                <button className="phrase-cat-header" onClick={() => setOpen((p) => (p === cat.id ? null : cat.id))} aria-expanded={isOpen}>
+                  <span className="phrase-cat-title">
+                    <span className="phrase-cat-icon">{cat.icon}</span>
+                    {cat.label}
+                  </span>
+                  <svg className={`phrase-chevron${isOpen ? ' phrase-chevron--open' : ''}`} viewBox="0 0 24 24" aria-hidden="true">
+                    <path fill="currentColor" d="M7 10l5 5 5-5H7Z" />
+                  </svg>
+                </button>
+                {isOpen && (
+                  <ul className="phrase-items" role="list">
+                    {cat.phrases.map((p) => (
+                      <PhraseItem key={p.romaji} p={p} speaking={speaking} onSpeak={handleSpeak} />
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }

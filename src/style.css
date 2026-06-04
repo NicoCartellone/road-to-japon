@@ -1135,6 +1135,70 @@ h1 {
   height: 16px;
 }
 
+/* ── Buscador de frases ──────────────────────────────── */
+.phrase-search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.phrase-search-ico {
+  position: absolute;
+  left: 14px;
+  width: 18px;
+  height: 18px;
+  color: rgba(255 255 255 / 0.35);
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+.phrase-search {
+  width: 100%;
+  padding: 12px 40px 12px 42px;
+  background: rgba(255 255 255 / 0.07);
+  border: 1px solid rgba(255 255 255 / 0.12);
+  border-radius: 14px;
+  color: #fff;
+  font-size: 15px;
+  outline: none;
+}
+
+.phrase-search::placeholder {
+  color: rgba(255 255 255 / 0.35);
+}
+
+.phrase-search:focus {
+  border-color: rgba(255 255 255 / 0.28);
+  background: rgba(255 255 255 / 0.09);
+}
+
+.phrase-search-clear {
+  position: absolute;
+  right: 10px;
+  width: 28px;
+  height: 28px;
+  background: rgba(255 255 255 / 0.1);
+  border: 0;
+  border-radius: 50%;
+  color: rgba(255 255 255 / 0.6);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.phrase-search-clear svg {
+  width: 14px;
+  height: 14px;
+}
+
+.phrase-cat-chip {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255 255 255 / 0.35);
+  letter-spacing: 0.04em;
+  margin-bottom: 2px;
+}
+
 .cl-add {
   display: flex;
   gap: 8px;
