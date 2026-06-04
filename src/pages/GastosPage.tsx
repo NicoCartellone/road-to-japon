@@ -10,10 +10,10 @@ type Gasto = { id: string; desc: string; amount: number; paidBy: string; date: n
 type Transfer = { fromId: string; toId: string; amount: number }
 
 const DEFAULT_PERSONAS: Persona[] = [
-  { id: 'p1', name: 'Viajero 1' },
-  { id: 'p2', name: 'Viajero 2' },
-  { id: 'p3', name: 'Viajero 3' },
-  { id: 'p4', name: 'Viajero 4' },
+  { id: 'p1', name: 'Gaby' },
+  { id: 'p2', name: 'Mile' },
+  { id: 'p3', name: 'Lucas' },
+  { id: 'p4', name: 'Nico' },
 ]
 
 const DOC_REF = doc(db, 'gastos', 'state')
@@ -63,8 +63,6 @@ export default function GastosPage() {
   const [desc, setDesc] = useState('')
   const [amount, setAmount] = useState('')
   const [paidBy, setPaidBy] = useState('p1')
-  const [editingPersona, setEditingPersona] = useState<string | null>(null)
-  const [personaDraft, setPersonaDraft] = useState('')
   const [confirmPending, setConfirmPending] = useState<{ action: () => void } | null>(null)
 
   useEffect(() => {
@@ -132,15 +130,6 @@ export default function GastosPage() {
     await persist(personas, next)
   }
 
-  async function savePersonaName(id: string) {
-    const name = personaDraft.trim()
-    setEditingPersona(null)
-    if (!name) return
-    const next = personas.map((p) => (p.id === id ? { ...p, name } : p))
-    setPersonas(next)
-    await persist(next, gastos)
-  }
-
   const balances = calcBalances(personas, gastos)
   const transfers = calcTransfers(personas, balances)
   const personaById = Object.fromEntries(personas.map((p) => [p.id, p.name]))
@@ -156,77 +145,6 @@ export default function GastosPage() {
         <h1>Gastos</h1>
         <p className="sub">Quién pagó qué — sin dramas al final del viaje.</p>
       </header>
-
-      {/* Viajeros */}
-      <div className="card">
-        <p className="gasto-label">Viajeros — tap para renombrar</p>
-        <div className="gasto-personas">
-          {personas.map((p) =>
-            editingPersona === p.id ? (
-              <input
-                key={p.id}
-                className="gasto-persona-input"
-                value={personaDraft}
-                onChange={(e) => setPersonaDraft(e.target.value)}
-                onBlur={() => savePersonaName(p.id)}
-                onKeyDown={(e) => e.key === 'Enter' && savePersonaName(p.id)}
-                autoFocus
-                maxLength={12}
-              />
-            ) : (
-              <button
-                key={p.id}
-                className="gasto-persona-btn"
-                onClick={() => {
-                  setEditingPersona(p.id)
-                  setPersonaDraft(p.name)
-                }}
-              >
-                {p.name}
-              </button>
-            )
-          )}
-        </div>
-      </div>
-
-      {/* Balance */}
-      {!loading && gastos.length > 0 && (
-        <div className="card">
-          <p className="gasto-label">Balance · total ¥{total.toLocaleString()}</p>
-          <div className="gasto-balance-list">
-            {personas.map((p) => {
-              const bal = Math.round(balances[p.id] ?? 0)
-              return (
-                <div key={p.id} className="gasto-balance-row">
-                  <span className="gasto-balance-name">{p.name}</span>
-                  <span
-                    className={`gasto-balance-amount${bal > 0 ? ' gasto-balance--pos' : bal < 0 ? ' gasto-balance--neg' : ''}`}
-                  >
-                    {bal > 0 ? '+' : ''}
-                    {bal.toLocaleString()}
-                  </span>
-                </div>
-              )
-            })}
-          </div>
-
-          {transfers.length > 0 && (
-            <>
-              <p className="gasto-label" style={{ marginTop: 16 }}>Cómo saldar cuentas</p>
-              <div className="gasto-transfers">
-                {transfers.map((t, i) => (
-                  <div key={i} className="gasto-transfer-row">
-                    <span className="gasto-transfer-name">{personaById[t.fromId]}</span>
-                    <span className="gasto-transfer-arrow">→</span>
-                    <span className="gasto-transfer-name">{personaById[t.toId]}</span>
-                    <span className="gasto-transfer-amount">¥{t.amount.toLocaleString()}</span>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-      )}
 
       {/* Agregar gasto */}
       <form className="card" onSubmit={(e) => { e.preventDefault(); addGasto() }}>
@@ -268,6 +186,45 @@ export default function GastosPage() {
           </button>
         </div>
       </form>
+
+      {/* Balance */}
+      {!loading && gastos.length > 0 && (
+        <div className="card">
+          <p className="gasto-label">Balance · total ¥{total.toLocaleString()}</p>
+          <div className="gasto-balance-list">
+            {personas.map((p) => {
+              const bal = Math.round(balances[p.id] ?? 0)
+              return (
+                <div key={p.id} className="gasto-balance-row">
+                  <span className="gasto-balance-name">{p.name}</span>
+                  <span
+                    className={`gasto-balance-amount${bal > 0 ? ' gasto-balance--pos' : bal < 0 ? ' gasto-balance--neg' : ''}`}
+                  >
+                    {bal > 0 ? '+' : ''}
+                    {bal.toLocaleString()}
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+
+          {transfers.length > 0 && (
+            <>
+              <p className="gasto-label" style={{ marginTop: 16 }}>Cómo saldar cuentas</p>
+              <div className="gasto-transfers">
+                {transfers.map((t, i) => (
+                  <div key={i} className="gasto-transfer-row">
+                    <span className="gasto-transfer-name">{personaById[t.fromId]}</span>
+                    <span className="gasto-transfer-arrow">→</span>
+                    <span className="gasto-transfer-name">{personaById[t.toId]}</span>
+                    <span className="gasto-transfer-amount">¥{t.amount.toLocaleString()}</span>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      )}
 
       {/* Historial */}
       {loading ? (
