@@ -781,6 +781,29 @@ h1 {
   line-height: 1.4;
 }
 
+.nota-edit-header {
+  display: flex;
+  justify-content: flex-end;
+  padding: 10px 10px 0;
+}
+
+.nota-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255 255 255 / 0.08);
+  border: 0;
+  color: rgba(255 255 255 / 0.5);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.nota-close svg {
+  width: 16px;
+  height: 16px;
+}
+
 .nota-title-input {
   display: block;
   width: 100%;
