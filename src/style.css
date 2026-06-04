@@ -845,6 +845,296 @@ h1 {
   cursor: pointer;
 }
 
+/* ── Itinerario: temperatura ────────────────────────── */
+.itin-temp {
+  font-size: 12px;
+  color: rgba(255 255 255 / 0.4);
+  flex-shrink: 0;
+  margin-right: 4px;
+}
+
+/* ── Wishlist ────────────────────────────────────────── */
+.wish-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.wish-item {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid rgba(255 255 255 / 0.06);
+}
+
+.wish-item:last-child {
+  border-bottom: 0;
+}
+
+.wish-check {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.wish-text {
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.wish-text--done {
+  text-decoration: line-through;
+  color: rgba(255 255 255 / 0.35);
+}
+
+.wish-del {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: 0;
+  color: rgba(255 255 255 / 0.3);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  margin-right: 4px;
+}
+
+.wish-del svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ── Gastos ──────────────────────────────────────────── */
+.gasto-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255 255 255 / 0.4);
+  margin: 0 0 12px;
+}
+
+.gasto-personas {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.gasto-persona-btn {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(255 255 255 / 0.07);
+  border: 1px solid rgba(255 255 255 / 0.1);
+  color: rgba(255 255 255 / 0.85);
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+  cursor: pointer;
+}
+
+.gasto-persona-input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(255 255 255 / 0.1);
+  border: 1px solid rgba(124 58 237 / 0.5);
+  color: #fff;
+  font-size: 14px;
+  outline: none;
+}
+
+.gasto-balance-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.gasto-balance-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 15px;
+}
+
+.gasto-balance-name {
+  color: rgba(255 255 255 / 0.75);
+}
+
+.gasto-balance-amount {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: rgba(255 255 255 / 0.5);
+}
+
+.gasto-balance--pos { color: #4ade80; }
+.gasto-balance--neg { color: #f87171; }
+
+.gasto-transfers {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.gasto-transfer-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(255 255 255 / 0.05);
+}
+
+.gasto-transfer-name {
+  color: rgba(255 255 255 / 0.8);
+  font-weight: 500;
+}
+
+.gasto-transfer-arrow {
+  color: rgba(255 255 255 / 0.3);
+}
+
+.gasto-transfer-amount {
+  margin-left: auto;
+  font-weight: 700;
+  color: #a78bfa;
+}
+
+.gasto-input {
+  display: block;
+  width: 100%;
+  padding: 11px 14px;
+  background: rgba(255 255 255 / 0.07);
+  border: 1px solid rgba(255 255 255 / 0.12);
+  border-radius: 10px;
+  color: #fff;
+  font-size: 15px;
+  outline: none;
+  margin-bottom: 10px;
+}
+
+.gasto-input::placeholder { color: rgba(255 255 255 / 0.3); }
+.gasto-input:focus { border-color: rgba(255 255 255 / 0.3); }
+
+.gasto-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.gasto-input--amount {
+  width: 110px;
+  flex-shrink: 0;
+  margin-bottom: 0;
+}
+
+.gasto-select {
+  flex: 1;
+  padding: 11px 10px;
+  background: rgba(255 255 255 / 0.07);
+  border: 1px solid rgba(255 255 255 / 0.12);
+  border-radius: 10px;
+  color: #fff;
+  font-size: 14px;
+  outline: none;
+}
+
+.gasto-add-btn {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: #6c5ce7;
+  color: #fff;
+  border: 0;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.gasto-add-btn:disabled { opacity: 0.35; }
+
+.gasto-add-btn svg {
+  width: 22px;
+  height: 22px;
+}
+
+.gasto-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.gasto-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255 255 255 / 0.06);
+}
+
+.gasto-item:last-child { border-bottom: 0; }
+
+.gasto-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.gasto-item-desc {
+  font-size: 15px;
+  color: rgba(255 255 255 / 0.9);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gasto-item-meta {
+  font-size: 12px;
+  color: rgba(255 255 255 / 0.4);
+}
+
+.gasto-item-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.gasto-item-amount {
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #a78bfa;
+}
+
+.gasto-item-del {
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: 0;
+  color: rgba(255 255 255 / 0.25);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.gasto-item-del svg {
+  width: 16px;
+  height: 16px;
+}
+
 .cl-add {
   display: flex;
   gap: 8px;

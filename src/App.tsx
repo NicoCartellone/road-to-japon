@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import ChecklistPage from './pages/ChecklistPage'
 import ConverterPage from './pages/ConverterPage'
+import GastosPage from './pages/GastosPage'
 import HomePage from './pages/HomePage'
 import ItineraryPage from './pages/ItineraryPage'
 import NotasPage from './pages/NotasPage'
@@ -128,6 +129,7 @@ export default function App() {
           <Route path="/conversor" element={<ConverterPage />} />
           <Route path="/frases" element={<PhrasesPage />} />
           <Route path="/notas" element={<NotasPage />} />
+          <Route path="/gastos" element={<GastosPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
