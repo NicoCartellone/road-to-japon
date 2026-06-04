@@ -25,6 +25,7 @@ type PwaNeedRefreshEvent = CustomEvent<{
 
 type Remaining = {
   done: boolean
+  mo: number
   dd: number
   hh: number
   mm: number
@@ -72,20 +73,27 @@ function getTargetEpochMsInBuenosAires(): number {
 function calcRemaining(targetEpochMs: number): Remaining {
   const now = Date.now()
   const remainingMs = Math.max(0, targetEpochMs - now)
-  const totalSeconds = Math.floor(remainingMs / 1000)
 
-  const dd = Math.floor(totalSeconds / 86400)
-  const hh = Math.floor((totalSeconds % 86400) / 3600)
-  const mm = Math.floor((totalSeconds % 3600) / 60)
-  const ss = totalSeconds % 60
+  if (remainingMs === 0) return { done: true, mo: 0, dd: 0, hh: 0, mm: 0, ss: 0 }
 
-  return {
-    done: remainingMs === 0,
-    dd,
-    hh,
-    mm,
-    ss
-  }
+  const nowDate = new Date(now)
+  const targetDate = new Date(targetEpochMs)
+
+  let mo = (targetDate.getFullYear() - nowDate.getFullYear()) * 12 + (targetDate.getMonth() - nowDate.getMonth())
+
+  // Verificar que sumar mo meses no supere el target
+  const afterMonths = new Date(nowDate.getFullYear(), nowDate.getMonth() + mo, nowDate.getDate(), nowDate.getHours(), nowDate.getMinutes(), nowDate.getSeconds(), nowDate.getMilliseconds())
+  if (afterMonths.getTime() > targetEpochMs) mo--
+
+  const baseMs = new Date(nowDate.getFullYear(), nowDate.getMonth() + mo, nowDate.getDate(), nowDate.getHours(), nowDate.getMinutes(), nowDate.getSeconds(), nowDate.getMilliseconds()).getTime()
+  const leftSeconds = Math.floor((targetEpochMs - baseMs) / 1000)
+
+  const dd = Math.floor(leftSeconds / 86400)
+  const hh = Math.floor((leftSeconds % 86400) / 3600)
+  const mm = Math.floor((leftSeconds % 3600) / 60)
+  const ss = leftSeconds % 60
+
+  return { done: false, mo, dd, hh, mm, ss }
 }
 
 export default function App() {

@@ -1,5 +1,6 @@
 type Remaining = {
   done: boolean
+  mo: number
   dd: number
   hh: number
   mm: number
@@ -29,6 +30,11 @@ export default function HomePage({ remaining }: Props) {
       <section className="card" aria-label="Cuenta regresiva">
         {!remaining.done ? (
           <div className="count" role="timer" aria-live="polite">
+            <div className="cell">
+              <span className="num">{remaining.mo}</span>
+              <span className="lbl">meses</span>
+            </div>
+            <div className="sep">:</div>
             <div className="cell">
               <span className="num">{remaining.dd}</span>
               <span className="lbl">días</span>
