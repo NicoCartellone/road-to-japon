@@ -753,6 +753,7 @@ h1 {
 
 .nota-card--editing {
   border-color: rgba(124 58 237 / 0.4);
+  position: relative;
 }
 
 .nota-preview {
@@ -782,9 +783,10 @@ h1 {
 }
 
 .nota-edit-header {
-  display: flex;
-  justify-content: flex-end;
-  padding: 10px 10px 0;
+  position: absolute;
+  top: 6px;
+  right: 10px;
+  z-index: 1;
 }
 
 .nota-close {
@@ -810,7 +812,7 @@ h1 {
   background: transparent;
   border: 0;
   border-bottom: 1px solid rgba(255 255 255 / 0.1);
-  padding: 14px 16px 12px;
+  padding: 14px 48px 12px 16px;
   font-size: 16px;
   font-weight: 600;
   color: #fff;
