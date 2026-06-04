@@ -914,7 +914,7 @@ h1 {
 
   .count {
     grid-template-columns: 1fr;
-    gap: 10px;
+    gap: 6px;
     justify-items: center;
     width: 100%;
     padding-inline: 10px;
@@ -923,6 +923,7 @@ h1 {
   .cell {
     width: 100%;
     max-width: 440px;
+    padding: 8px 10px;
   }
 
   .bottom-nav {
