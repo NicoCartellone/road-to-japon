@@ -1160,6 +1160,33 @@ h1 {
   height: 16px;
 }
 
+/* ── Gastos: currency selector ──────────────────────── */
+.gasto-currency-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.gasto-currency-btn {
+  flex: 1;
+  padding: 8px 6px;
+  border-radius: 10px;
+  background: rgba(255 255 255 / 0.05);
+  border: 1px solid rgba(255 255 255 / 0.1);
+  color: rgba(255 255 255 / 0.5);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+
+.gasto-currency-btn--on {
+  background: rgba(108 92 231 / 0.2);
+  border-color: rgba(108 92 231 / 0.55);
+  color: rgba(255 255 255 / 0.9);
+}
+
 /* ── Gastos: split selector ─────────────────────────── */
 .gasto-split-grid {
   display: grid;

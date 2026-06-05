@@ -6,8 +6,19 @@ import { ensureAnonymousAuth } from '../lib/auth'
 import ConfirmDialog from '../shared/ui/ConfirmDialog'
 
 type Persona = { id: string; name: string }
-type Gasto = { id: string; desc: string; amount: number; paidBy: string; date: number; splitWith: string[] }
+type Currency = 'JPY' | 'ARS' | 'USD'
+type Phase = 'pre' | 'viaje'
+type Gasto = {
+  id: string; desc: string; amount: number; paidBy: string
+  date: number; splitWith: string[]; currency: Currency; phase: Phase
+}
 type Transfer = { fromId: string; toId: string; amount: number }
+
+const CURRENCIES: Record<Currency, { symbol: string; label: string }> = {
+  JPY: { symbol: '¥', label: 'JPY' },
+  ARS: { symbol: '$', label: 'ARS' },
+  USD: { symbol: 'US$', label: 'USD' },
+}
 
 const DEFAULT_PERSONAS: Persona[] = [
   { id: 'p1', name: 'Gaby' },
@@ -17,7 +28,6 @@ const DEFAULT_PERSONAS: Persona[] = [
 ]
 
 const ALL_IDS = DEFAULT_PERSONAS.map((p) => p.id)
-
 const DOC_REF = doc(db, 'gastos', 'state')
 
 function calcBalances(personas: Persona[], gastos: Gasto[]): Record<string, number> {
@@ -56,14 +66,22 @@ function calcTransfers(personas: Persona[], balances: Record<string, number>): T
   return transfers
 }
 
+function fmt(amount: number, currency: Currency) {
+  const { symbol } = CURRENCIES[currency]
+  if (currency === 'JPY') return `${symbol}${Math.round(amount).toLocaleString()}`
+  return `${symbol}${amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+}
+
 export default function GastosPage() {
   const [personas, setPersonas] = useState<Persona[]>(DEFAULT_PERSONAS)
   const [gastos, setGastos] = useState<Gasto[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [tab, setTab] = useState<Phase>('viaje')
   const [desc, setDesc] = useState('')
   const [amount, setAmount] = useState('')
   const [paidBy, setPaidBy] = useState('p1')
+  const [currency, setCurrency] = useState<Currency>('JPY')
   const [splitWith, setSplitWith] = useState<string[]>(ALL_IDS)
   const [confirmPending, setConfirmPending] = useState<{ action: () => void } | null>(null)
 
@@ -91,10 +109,7 @@ export default function GastosPage() {
         )
       })
       .catch(() => {
-        if (!cancelled) {
-          setError('No se pudo autenticar.')
-          setLoading(false)
-        }
+        if (!cancelled) { setError('No se pudo autenticar.'); setLoading(false) }
       })
     return () => { cancelled = true; if (unsub) unsub() }
   }, [])
@@ -114,7 +129,7 @@ export default function GastosPage() {
     const amt = parseFloat(amount)
     if (!desc.trim() || isNaN(amt) || amt <= 0 || splitWith.length === 0) return
     const next: Gasto[] = [
-      { id: `g_${Date.now()}`, desc: desc.trim(), amount: amt, paidBy, date: Date.now(), splitWith: [...splitWith] },
+      { id: `g_${Date.now()}`, desc: desc.trim(), amount: amt, paidBy, date: Date.now(), splitWith: [...splitWith], currency, phase: tab },
       ...gastos,
     ]
     setGastos(next)
@@ -131,15 +146,13 @@ export default function GastosPage() {
   }
 
   function toggleSplit(id: string) {
-    setSplitWith((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    )
+    setSplitWith((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id])
   }
 
-  const balances = calcBalances(personas, gastos)
-  const transfers = calcTransfers(personas, balances)
   const personaById = Object.fromEntries(personas.map((p) => [p.id, p.name]))
-  const total = gastos.reduce((s, g) => s + g.amount, 0)
+  // gastos for current tab (old gastos without phase default to 'viaje')
+  const tabGastos = gastos.filter((g) => (g.phase ?? 'viaje') === tab)
+  const usedCurrencies = [...new Set(tabGastos.map((g) => g.currency ?? 'JPY'))] as Currency[]
 
   return (
     <div className="page page--scrollable">
@@ -152,6 +165,15 @@ export default function GastosPage() {
         <p className="sub">Quién pagó qué — sin dramas al final del viaje.</p>
       </header>
 
+      <div className="cl-tabs">
+        <button className={`cl-tab${tab === 'pre' ? ' cl-tab--active' : ''}`} onClick={() => setTab('pre')}>
+          Pre-viaje
+        </button>
+        <button className={`cl-tab${tab === 'viaje' ? ' cl-tab--active' : ''}`} onClick={() => setTab('viaje')}>
+          En Japón
+        </button>
+      </div>
+
       {/* Agregar gasto */}
       <form className="card" onSubmit={(e) => { e.preventDefault(); addGasto() }}>
         <p className="gasto-label">Agregar gasto</p>
@@ -162,10 +184,22 @@ export default function GastosPage() {
           onChange={(e) => setDesc(e.target.value)}
           maxLength={60}
         />
+        <div className="gasto-currency-row">
+          {(Object.keys(CURRENCIES) as Currency[]).map((c) => (
+            <button
+              key={c}
+              type="button"
+              className={`gasto-currency-btn${currency === c ? ' gasto-currency-btn--on' : ''}`}
+              onClick={() => setCurrency(c)}
+            >
+              {CURRENCIES[c].symbol} {c}
+            </button>
+          ))}
+        </div>
         <div className="gasto-row" style={{ marginBottom: 12 }}>
           <input
             className="gasto-input gasto-input--amount"
-            placeholder="¥ Monto"
+            placeholder="Monto"
             type="number"
             inputMode="decimal"
             value={amount}
@@ -217,56 +251,64 @@ export default function GastosPage() {
         </button>
       </form>
 
-      {/* Balance */}
-      {!loading && gastos.length > 0 && (
-        <div className="card">
-          <p className="gasto-label">Balance · total ¥{total.toLocaleString()}</p>
-          <div className="gasto-balance-list">
-            {personas.map((p) => {
-              const bal = Math.round(balances[p.id] ?? 0)
-              return (
-                <div key={p.id} className="gasto-balance-row">
-                  <span className="gasto-balance-name">{p.name}</span>
-                  <span className={`gasto-balance-amount${bal > 0 ? ' gasto-balance--pos' : bal < 0 ? ' gasto-balance--neg' : ''}`}>
-                    {bal > 0 ? '+' : ''}{bal.toLocaleString()}
-                  </span>
-                </div>
-              )
-            })}
-          </div>
-
-          {transfers.length > 0 && (
-            <>
-              <p className="gasto-label" style={{ marginTop: 16 }}>Cómo saldar cuentas</p>
-              <div className="gasto-transfers">
-                {transfers.map((t, i) => (
-                  <div key={i} className="gasto-transfer-row">
-                    <span className="gasto-transfer-name">{personaById[t.fromId]}</span>
-                    <span className="gasto-transfer-arrow">→</span>
-                    <span className="gasto-transfer-name">{personaById[t.toId]}</span>
-                    <span className="gasto-transfer-amount">¥{t.amount.toLocaleString()}</span>
+      {/* Balance por moneda */}
+      {!loading && tabGastos.length > 0 && usedCurrencies.map((curr) => {
+        const currGastos = tabGastos.filter((g) => (g.currency ?? 'JPY') === curr)
+        const currTotal = currGastos.reduce((s, g) => s + g.amount, 0)
+        const balances = calcBalances(personas, currGastos)
+        const transfers = calcTransfers(personas, balances)
+        return (
+          <div key={curr} className="card">
+            <p className="gasto-label">Balance {curr} · total {fmt(currTotal, curr)}</p>
+            <div className="gasto-balance-list">
+              {personas.map((p) => {
+                const bal = balances[p.id] ?? 0
+                const balRound = curr === 'JPY' ? Math.round(bal) : Math.round(bal * 100) / 100
+                const display = curr === 'JPY'
+                  ? (balRound > 0 ? '+' : '') + balRound.toLocaleString()
+                  : (balRound > 0 ? '+' : '') + balRound.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                return (
+                  <div key={p.id} className="gasto-balance-row">
+                    <span className="gasto-balance-name">{p.name}</span>
+                    <span className={`gasto-balance-amount${balRound > 0 ? ' gasto-balance--pos' : balRound < 0 ? ' gasto-balance--neg' : ''}`}>
+                      {display}
+                    </span>
                   </div>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-      )}
+                )
+              })}
+            </div>
+            {transfers.length > 0 && (
+              <>
+                <p className="gasto-label" style={{ marginTop: 16 }}>Cómo saldar cuentas</p>
+                <div className="gasto-transfers">
+                  {transfers.map((t, i) => (
+                    <div key={i} className="gasto-transfer-row">
+                      <span className="gasto-transfer-name">{personaById[t.fromId]}</span>
+                      <span className="gasto-transfer-arrow">→</span>
+                      <span className="gasto-transfer-name">{personaById[t.toId]}</span>
+                      <span className="gasto-transfer-amount">{fmt(t.amount, curr)}</span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        )
+      })}
 
       {/* Historial */}
       {loading ? (
         <p className="sub" style={{ textAlign: 'center' }}>Cargando…</p>
       ) : error ? (
         <p className="sub" style={{ textAlign: 'center' }}>{error}</p>
-      ) : gastos.length > 0 ? (
+      ) : tabGastos.length > 0 ? (
         <div className="card" style={{ paddingBottom: 8 }}>
           <p className="gasto-label">Historial</p>
           <ul className="gasto-list" role="list">
-            {gastos.map((g) => {
+            {tabGastos.map((g) => {
+              const curr = g.currency ?? 'JPY'
               const isPartial = g.splitWith?.length > 0 && g.splitWith.length < personas.length
-              const splitNames = isPartial
-                ? g.splitWith.map((id) => personaById[id] ?? id).join(', ')
-                : null
+              const splitNames = isPartial ? g.splitWith.map((id) => personaById[id] ?? id).join(', ') : null
               return (
                 <li key={g.id} className="gasto-item">
                   <div className="gasto-item-info">
@@ -278,7 +320,7 @@ export default function GastosPage() {
                     </span>
                   </div>
                   <div className="gasto-item-right">
-                    <span className="gasto-item-amount">¥{g.amount.toLocaleString()}</span>
+                    <span className="gasto-item-amount">{fmt(g.amount, curr)}</span>
                     <button className="gasto-item-del" onClick={() => setConfirmPending({ action: () => deleteGasto(g.id) })} aria-label="Eliminar">
                       <svg viewBox="0 0 24 24" aria-hidden="true">
                         <path fill="currentColor" d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z" />
@@ -290,7 +332,11 @@ export default function GastosPage() {
             })}
           </ul>
         </div>
-      ) : null}
+      ) : (
+        <p className="sub" style={{ textAlign: 'center', marginTop: 8 }}>
+          Todavía no hay gastos {tab === 'pre' ? 'pre-viaje' : 'en Japón'}.
+        </p>
+      )}
 
       {confirmPending && (
         <ConfirmDialog
