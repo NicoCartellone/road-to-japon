@@ -116,6 +116,7 @@ body::after {
   flex: 1;
   justify-content: center;
   gap: 18px;
+  position: relative;
 }
 
 .header {
