@@ -1160,6 +1160,73 @@ h1 {
   height: 16px;
 }
 
+/* ── Gastos: split selector ─────────────────────────── */
+.gasto-split-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.gasto-split-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(255 255 255 / 0.05);
+  border: 1px solid rgba(255 255 255 / 0.1);
+  color: rgba(255 255 255 / 0.5);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+
+.gasto-split-chip--on {
+  background: rgba(108 92 231 / 0.2);
+  border-color: rgba(108 92 231 / 0.55);
+  color: rgba(255 255 255 / 0.9);
+}
+
+.gasto-split-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255 255 255 / 0.2);
+  background: transparent;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  transition: background 0.12s, border-color 0.12s;
+}
+
+.gasto-split-chip--on .gasto-split-dot {
+  background: #6c5ce7;
+  border-color: #6c5ce7;
+}
+
+.gasto-split-dot svg {
+  width: 11px;
+  height: 11px;
+}
+
+.gasto-add-btn-full {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  background: #6c5ce7;
+  color: #fff;
+  border: 0;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.gasto-add-btn-full:disabled { opacity: 0.35; }
+
 /* ── Buscador de frases ──────────────────────────────── */
 .phrase-search-wrap {
   position: relative;
