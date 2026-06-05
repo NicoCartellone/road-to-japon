@@ -166,7 +166,7 @@ export default function App() {
             }}
             disabled={isUpdating}
           >
-            {isUpdating ? 'Actualizando…' : 'Hay una actualización — Aplicar'}
+            {isUpdating ? 'Actualizando…' : `Nueva versión v${__APP_VERSION__} — Aplicar`}
           </button>
         </div>
       ) : null}

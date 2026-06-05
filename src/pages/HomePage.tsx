@@ -62,6 +62,7 @@ export default function HomePage({ remaining }: Props) {
           </div>
         )}
       </section>
+      <p className="app-version">v{__APP_VERSION__}</p>
     </div>
   )
 }

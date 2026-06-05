@@ -1435,6 +1435,15 @@ h1 {
   border-bottom: none;
 }
 
+/* ── App version ────────────────────────────────────── */
+.app-version {
+  font-size: 11px;
+  color: rgba(255 255 255 / 0.18);
+  text-align: center;
+  margin-top: 20px;
+  letter-spacing: 0.06em;
+}
+
 /* ── Confirm dialog ─────────────────────────────────── */
 .confirm-overlay {
   position: fixed;
