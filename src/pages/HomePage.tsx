@@ -61,8 +61,8 @@ export default function HomePage({ remaining }: Props) {
             <p>Nos vemos en Japón.</p>
           </div>
         )}
+        <p className="app-version">v{__APP_VERSION__}</p>
       </section>
-      <p className="app-version" style={{ position: 'absolute', bottom: 12, left: 0, right: 0 }}>v{__APP_VERSION__}</p>
     </div>
   )
 }

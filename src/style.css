@@ -116,7 +116,6 @@ body::after {
   flex: 1;
   justify-content: center;
   gap: 18px;
-  position: relative;
 }
 
 .header {
@@ -1441,7 +1440,7 @@ h1 {
   font-size: 11px;
   color: rgba(255 255 255 / 0.18);
   text-align: center;
-  margin-top: 20px;
+  margin-top: 10px;
   letter-spacing: 0.06em;
 }
 
